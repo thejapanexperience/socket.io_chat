@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>socket.io Chat Test</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="/socket.io/socket.io.js" charset="utf-8"></script>
+  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+</head>
+
+<body>
+  <ul id="messages"></ul>
+  <p id="typing">Someone is typing</p>
+  <form id="form" action="">
+    <input id="m" autocomplete="off" /><button>Send</button>
+  </form>
+
+  <script type="text/javascript">
+    $('#typing').hide()
+  </script>
+
+  <script type="text/javascript">
+    $(function() {
+      var socket = io()
+      $('form').submit(function() {
+        socket.emit('chat message', $('#m').val())
+        $('#m').val('')
+        return false
+      })
+
+      $('#m').keyup(function() {
+        var value = $('#m').val()
+        console.log('value: ', value)
+        if (value) {
+          socket.emit('typing')
+        } else {
+          socket.emit('stopped typing')
+        }
+      })
+
+      socket.on('chat message', function(msg) {
+        $('#messages').append($('<li>').text(msg))
+        $('#typing').hide()
+      })
+
+      socket.on('typing', function() {
+        $('#typing').show()
+      })
+
+      socket.on('stopped typing', function() {
+        $('#typing').hide()
+      })
+
+      socket.on('user connected', function(msg) {
+        $('#messages').append($('<li>').text(msg))
+      })
+
+      socket.on('user disconnected', function(msg) {
+        $('#messages').append($('<li>').text(msg))
+      })
+
+    })
+  </script>
+</body>
+
+</html>
